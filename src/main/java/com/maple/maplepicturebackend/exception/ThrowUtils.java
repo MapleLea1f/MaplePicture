@@ -25,7 +25,7 @@ public class ThrowUtils {
      */
     // 函数重载
     public static void throwIf(boolean condition, ErrorCode errorCode){
-        throwIf(condition, new BussinessException(errorCode));
+        throwIf(condition, new BusinessException(errorCode));
     }
 
     /**
@@ -35,6 +35,6 @@ public class ThrowUtils {
      * @param message
      */
     public static void throwIf(boolean condition, ErrorCode errorCode, String message){
-        throwIf(condition, new BussinessException(errorCode, message));
+        throwIf(condition, new BusinessException(errorCode, message));
     }
 }

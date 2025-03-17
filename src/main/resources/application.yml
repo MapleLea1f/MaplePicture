@@ -13,7 +13,7 @@ spring:
 mybatis-plus:
   configuration:
     # MyBatis 配置
-    map-underscore-to-camel-case: true
+    map-underscore-to-camel-case: false
     # 仅在开发环境打印日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
@@ -32,3 +32,11 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.maple.maplepicturebackend.controller
+## 对象存储配置（需要从腾讯云获取）
+#cos:
+#  client:
+#    host: xxx
+#    secretId: xxx
+#    secretKey: xxx
+#    region: xxx
+#    bucket: xxx
