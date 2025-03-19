@@ -38,18 +38,19 @@ public class FileController {
     public BaseResponse<String> testUploadFile(@RequestPart("file") MultipartFile multipartFile) {
         String filename = multipartFile.getOriginalFilename();
         String filepath = String.format("/test/%s", filename);
-
         File file = null;
-
         try {
+            // 上传文件
             file = File.createTempFile(filepath, "");
             multipartFile.transferTo(file);
             cosManager.putObject(filepath, file);
+            // 返回可访问的地址
             return ResultUtils.success(filepath);
         } catch (Exception e) {
             log.error("file upload error, filepath = {}", filepath, e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传失败");
         } finally {
+            // 删除临时文件
             if (file != null) {
                 boolean delete = file.delete();
                 if (!delete) {

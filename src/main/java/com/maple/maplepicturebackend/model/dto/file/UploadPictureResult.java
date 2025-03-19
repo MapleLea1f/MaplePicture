@@ -13,7 +13,7 @@ public class UploadPictureResult {
     /**  
      * 图片名称  
      */  
-    private String picName;  
+    private String name;
   
     /**  
      * 文件体积  
