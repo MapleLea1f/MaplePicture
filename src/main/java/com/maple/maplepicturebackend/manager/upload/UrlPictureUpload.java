@@ -35,11 +35,11 @@ public class UrlPictureUpload extends PictureUploadTemplate {
     @Override
     protected String getOriginalFilename(Object inputSource) {
         String fileUrl = (String) inputSource;
-        return FileUtil.mainName(fileUrl);
+        return FileUtil.getName(fileUrl);
     }
 
     @Override
-    protected void validPicture(Object inputSource) {
+    protected String validPicture(Object inputSource) {
         String fileUrl = (String) inputSource;
         // 1. 校验非空
         ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), ErrorCode.PARAMS_ERROR, "文件地址为空");
@@ -60,7 +60,7 @@ public class UrlPictureUpload extends PictureUploadTemplate {
                     .execute();
             // 未正常返回， 无需执行其他判断（有的不支持HEAD请求）
             if (httpResponse.getStatus() != HttpStatus.HTTP_OK) {
-                return;
+                return null;
             }
             // 5. 文件存在，文件类型校验
             String contentType = httpResponse.header("Content-Type");
@@ -83,6 +83,8 @@ public class UrlPictureUpload extends PictureUploadTemplate {
                 }
 
             }
+            return getSuffixFromContentType(contentType);
+
         } finally {
             // 释放资源
             if (httpResponse != null) {

@@ -40,13 +40,22 @@ public abstract class PictureUploadTemplate {
      */
     public UploadPictureResult uploadPicture(Object inputSource, String uploadPathPrefix) {
         // 1. 校验图片
-        validPicture(inputSource);
+        String contentType = validPicture(inputSource);
         // 2. 图片上传地址
         String uuid = RandomUtil.randomString(16);
         String originalFilename = getOriginalFilename(inputSource);
         // 自己拼接上传文件地址，而不是使用原始文件名称，可以增强安全性
-        String uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()),
-                uuid, FileUtil.getSuffix(originalFilename));
+        String uploadFilename;
+        // 如果contentType不为空，则使用contentType作为文件后缀
+        // 上传文件时候拼接的字符串
+        if (contentType == ""){
+            uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()),
+                    uuid, FileUtil.getSuffix(originalFilename));
+        } else {
+            uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()),
+                    uuid, contentType);
+        }
+
         // 相当于指定上传文件的相对路径
         String uploadPath = String.format("/%s/%s", uploadPathPrefix, uploadFilename);
         // 解析结果并返回
@@ -70,6 +79,20 @@ public abstract class PictureUploadTemplate {
         }
     }
 
+    public String getSuffixFromContentType(String contentType){
+        if (contentType == null) {
+            return "";
+        }
+
+        switch (contentType) {
+            case "image/jpeg": return "jpeg";
+            case "image/png": return "png";
+            case "image/jpg": return "jpg";
+            case "image/webp": return "webp";
+            default: return null;
+        }
+    }
+
     /**
      * 分装返回结果
      * @param imageInfo
@@ -87,7 +110,7 @@ public abstract class PictureUploadTemplate {
         // 封装返回结果
         UploadPictureResult uploadPictureResult = new UploadPictureResult();
         uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
-        uploadPictureResult.setName(FileUtil.mainName(originalFilename));
+        uploadPictureResult.setPicName(FileUtil.mainName(originalFilename));
         uploadPictureResult.setPicSize(FileUtil.size(file));
         uploadPictureResult.setPicWidth(picWidth);
         uploadPictureResult.setPicHeight(picHeight);
@@ -112,9 +135,11 @@ public abstract class PictureUploadTemplate {
 
     /**
      * 处理输入源并生成本地临时文件
+     *
      * @param inputSource
+     * @return
      */
-    protected abstract void validPicture(Object inputSource);
+    protected abstract String validPicture(Object inputSource);
 
     /**
      * 删除临时文件
