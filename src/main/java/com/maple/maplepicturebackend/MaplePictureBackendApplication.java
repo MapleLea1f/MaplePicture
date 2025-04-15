@@ -1,11 +1,12 @@
 package com.maple.maplepicturebackend;
 
-import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.scheduling.annotation.EnableAsync;
 
+@EnableAsync
 @SpringBootApplication
 @MapperScan("com.maple.maplepicturebackend.mapper")
 @EnableAspectJAutoProxy(exposeProxy = true)

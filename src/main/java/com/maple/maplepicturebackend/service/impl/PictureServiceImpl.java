@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.maple.maplepicturebackend.exception.BusinessException;
 import com.maple.maplepicturebackend.exception.ErrorCode;
 import com.maple.maplepicturebackend.exception.ThrowUtils;
+import com.maple.maplepicturebackend.manager.CosManager;
 import com.maple.maplepicturebackend.manager.upload.FilePictureUpload;
 import com.maple.maplepicturebackend.manager.upload.PictureUploadTemplate;
 import com.maple.maplepicturebackend.manager.upload.UrlPictureUpload;
@@ -31,6 +32,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -50,7 +52,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
-    implements PictureService{
+    implements PictureService {
 
     @Resource
     private FilePictureUpload filePictureUpload;
@@ -60,6 +62,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private UserService userService;
+    @Resource
+    private CosManager cosManager;
+
 
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
@@ -70,9 +75,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         if (pictureUploadRequest != null){
             pictureId = pictureUploadRequest.getId();
         }
+
+        Picture oldPicture = null;
         // 如果是更新，判断图片是否存在
         if (pictureId != null){
-            Picture oldPicture = this.getById(pictureId);
+            oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
             // 仅本人或管理员可编辑图片
             if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)){
@@ -113,6 +120,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
         // 根据有无id来判断是更新还是插入
         boolean result = this.saveOrUpdate(picture);
+        // 如果是更新，可以选择清理图片资源
+//        if (BooleanUtil.isTrue(result)){
+//            clearPictureFile(oldPicture);
+//        }
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "图片上传失败，数据库操作出错");
         // 返回包装的PictureVO
         return PictureVO.objToVo(picture);
@@ -344,6 +355,26 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         return uploadCount;
     }
 
+    @Async
+    @Override
+    public void clearPictureFile(Picture oldPicture) {
+        // 判断该图片是否被多条记录使用
+        String pictureUrl = oldPicture.getUrl();
+        Long count = this.lambdaQuery()
+                .eq(Picture::getUrl, pictureUrl)
+                .count();
+        // 有不止一条记录用到了该图片，不清理
+        if (count > 1) {
+            return;
+        }
+        // 删除图片
+        cosManager.deleteObject(pictureUrl);
+        // 删除缩略图
+        String thumbnailUrl = oldPicture.getThumbnailUrl();
+        if (StrUtil.isNotBlank(thumbnailUrl)) {
+            cosManager.deleteObject(thumbnailUrl);
+        }
+    }
 
 
 }
