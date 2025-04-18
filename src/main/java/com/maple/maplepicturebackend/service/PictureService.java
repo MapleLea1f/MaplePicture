@@ -3,10 +3,7 @@ package com.maple.maplepicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.maple.maplepicturebackend.model.dto.picture.PictureQueryRequest;
-import com.maple.maplepicturebackend.model.dto.picture.PictureReviewRequest;
-import com.maple.maplepicturebackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.maple.maplepicturebackend.model.dto.picture.PictureUploadRequest;
+import com.maple.maplepicturebackend.model.dto.picture.*;
 import com.maple.maplepicturebackend.model.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.User;
 import com.maple.maplepicturebackend.model.vo.PictureVO;
@@ -79,4 +76,24 @@ public interface PictureService extends IService<Picture> {
      */
     void clearPictureFile(Picture oldPicture);
 
+    /**
+     * 校验空间图片的权限
+     * @param loginUser
+     * @param picture
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    /**
+     * 删除图片
+     * @param pictureId
+     * @param loginUser
+     */
+    void deletePicture(long pictureId, User loginUser);
+
+    /**
+     * 编辑图片
+     * @param pictureEditRequest
+     * @param loginUser
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
 }
