@@ -30,6 +30,12 @@ public class Space implements Serializable {
     private Integer spaceLevel;
 
     /**
+     * 空间类型：0-私有 1-团队
+     */
+    private Integer spaceType;
+
+
+    /**
      * 空间图片的最大总大小
      */
     private Long maxSize;
@@ -54,7 +60,6 @@ public class Space implements Serializable {
      */
     private Long userId;
 
-
     /**
      * 创建时间
      */
@@ -78,4 +83,5 @@ public class Space implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
 }

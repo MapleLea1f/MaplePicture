@@ -9,6 +9,7 @@ import com.maple.maplepicturebackend.constant.UserConstant;
 import com.maple.maplepicturebackend.exception.BusinessException;
 import com.maple.maplepicturebackend.exception.ErrorCode;
 import com.maple.maplepicturebackend.exception.ThrowUtils;
+import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maple.maplepicturebackend.model.dto.space.*;
 import com.maple.maplepicturebackend.model.entity.Space;
 import com.maple.maplepicturebackend.model.entity.User;
@@ -36,6 +37,8 @@ public class SpaceController {
     private UserService userService;
     @Resource
     private SpaceService spaceService;
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
 
     /**
@@ -123,8 +126,12 @@ public class SpaceController {
         // 查询数据库
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
+        SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
+        User loginUser = userService.getLoginUser(request);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+        spaceVO.setPermissionList(permissionList);
         // 获取封装类
-        return ResultUtils.success(spaceService.getSpaceVO(space, request));
+        return ResultUtils.success(spaceVO);
     }
 
     /**
