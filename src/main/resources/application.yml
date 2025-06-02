@@ -3,6 +3,31 @@ server:
   servlet:
     context-path: /api
 spring:
+  # 空间图片分表
+  shardingsphere:
+    # 数据库配置
+    datasource:
+      url: jdbc:mysql://localhost:3306/maple_picture
+      username: root
+      password: 1234
+    rules:
+      sharding:
+        tables:
+          picture:
+            actual-data-nodes: maple_picture.picture # 动态分表
+            table-strategy:
+              standard:
+                sharding-column: spaceId
+                sharding-algorithm-name: picture_sharding_algorithm # 使用自定义分片算法
+        sharding-algorithm:
+          picture_sharding_algorithm:
+            type: CLASS_BASED
+            props:
+              strategy: standard
+              algorithmClassName: com.maple.maplepicturebackend.manager.sharding.PictureShardingAlgorithm
+  props:
+    sql-show: true
+
   redis:
     database: 0
     host: 127.0.0.1
@@ -10,13 +35,9 @@ spring:
     timeout: 5000
   application:
     name: maple-picture-backend
-    # 数据库配置
-  datasource:
-    url: jdbc:mysql://localhost:3306/maple_picture
-    username: root
-    password: 1234
   profiles:
     active: local
+
 
 mybatis-plus:
   configuration:
