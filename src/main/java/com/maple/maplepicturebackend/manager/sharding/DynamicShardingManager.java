@@ -1,6 +1,8 @@
 package com.maple.maplepicturebackend.manager.sharding;
 
+import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.maple.maplepicturebackend.model.entity.Space;
+import com.maple.maplepicturebackend.model.enums.SpaceLevelEnum;
 import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
 import com.maple.maplepicturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,15 +12,18 @@ import org.apache.shardingsphere.mode.manager.ContextManager;
 import org.apache.shardingsphere.shadow.rule.ShadowRule;
 import org.apache.shardingsphere.sharding.api.config.ShardingRuleConfiguration;
 import org.apache.shardingsphere.sharding.api.config.rule.ShardingTableRuleConfiguration;
-import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 @Slf4j
 public class DynamicShardingManager {
 
@@ -32,10 +37,30 @@ public class DynamicShardingManager {
 
     private static final String DATABASE_NAME = "maple_picture"; // 配置文件中的数据库名称
 
+    @PostConstruct
     public void initialize() {
         log.info("初始化动态分表配置...");
         updateShardingTableNodes();
     }
+
+    public void createSpacePictureTable(Space space) {
+        // 动态创建分表
+        // 仅为旗舰版团队空间创建分表
+        if (space.getSpaceType() == SpaceTypeEnum.TEAM.getValue() && space.getSpaceLevel() == SpaceLevelEnum.FLAGSHIP.getValue()) {
+            Long spaceId = space.getId();
+            String tableName = "picture_" + spaceId;
+            // 创建新表
+            String createTableSql = "CREATE TABLE " + tableName + " LIKE picture";
+            try {
+                SqlRunner.db().update(createTableSql);
+                // 更新分表
+                updateShardingTableNodes();
+            } catch (Exception e) {
+                log.error("创建图片空间分表失败，空间 id = {}", space.getId());
+            }
+        }
+    }
+
 
     /**
      * 获取所有动态表名，包括初始化表 picture 和 分表 picture_{spaceId}

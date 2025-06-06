@@ -12,6 +12,7 @@ import com.maple.maplepicturebackend.manager.websocket.model.enums.PictureEditMe
 import com.maple.maplepicturebackend.model.entity.User;
 import com.maple.maplepicturebackend.service.UserService;
 import groovyjarjarantlr4.v4.runtime.misc.NotNull;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class PictureEditHandler extends TextWebSocketHandler {
 
     @Resource

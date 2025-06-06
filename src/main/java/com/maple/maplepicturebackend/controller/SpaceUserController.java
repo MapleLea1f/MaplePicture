@@ -135,6 +135,7 @@ public class SpaceUserController {
         List<SpaceUser> spaceUserList = spaceUserService.list(
                 spaceUserService.getQueryWrapper(spaceUserQueryRequest)
         );
-        return ResultUtils.success(spaceUserService.getSpaceUserVOList(spaceUserList));
+        List<SpaceUserVO> spaceUserVOList = spaceUserService.getSpaceUserVOList(spaceUserList);
+        return ResultUtils.success(spaceUserVOList);
     }
 }

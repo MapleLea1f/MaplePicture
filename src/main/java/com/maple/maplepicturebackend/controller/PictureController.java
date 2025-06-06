@@ -204,7 +204,7 @@ public class PictureController {
         PictureVO pictureVO = pictureService.getPictureVO(picture, request);
         pictureVO.setPermissionList(permissionList);
         // 获取封装类
-        return ResultUtils.success();
+        return ResultUtils.success(pictureVO);
     }
 
     /**

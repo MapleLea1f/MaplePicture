@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.maple.maplepicturebackend.exception.BusinessException;
 import com.maple.maplepicturebackend.exception.ErrorCode;
 import com.maple.maplepicturebackend.exception.ThrowUtils;
+import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maple.maplepicturebackend.mapper.SpaceUserMapper;
 import com.maple.maplepicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.maple.maplepicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
@@ -48,6 +49,10 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
     @Resource
     @Lazy
     private SpaceService spaceService;
+
+    @Lazy
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     @Override
     public long addSpaceUser(SpaceUserAddRequest spaceUserAddRequest) {
@@ -159,7 +164,11 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             if (spaceIdSpaceListMap.containsKey(spaceId)) {
                 space = spaceIdSpaceListMap.get(spaceId).get(0);
             }
-            spaceUserVO.setSpace(SpaceVO.objToVo(space));
+            SpaceVO spaceVO = SpaceVO.objToVo(space);
+            if (spaceVO != null) {
+                spaceVO.setPermissionList(spaceUserAuthManager.getPermissionList(space, user));
+            }
+            spaceUserVO.setSpace(spaceVO);
         });
         return spaceUserVOList;
     }
