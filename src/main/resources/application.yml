@@ -34,7 +34,7 @@ spring:
     port: 6379
     timeout: 5000
   application:
-    name: maple-picture-backend
+    name: maple-picture-backend-ddd
   profiles:
     active: local
 
