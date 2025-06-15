@@ -1,22 +1,22 @@
 package com.maple.maplepicturebackend.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.maple.maplepicturebackend.annotation.AuthCheck;
-import com.maple.maplepicturebackend.common.BaseResponse;
-import com.maple.maplepicturebackend.common.DeleteRequest;
-import com.maple.maplepicturebackend.common.ResultUtils;
-import com.maple.maplepicturebackend.constant.UserConstant;
-import com.maple.maplepicturebackend.exception.BusinessException;
-import com.maple.maplepicturebackend.exception.ErrorCode;
-import com.maple.maplepicturebackend.exception.ThrowUtils;
+import com.maple.maplepicture.infrastructure.annotation.AuthCheck;
+import com.maple.maplepicture.infrastructure.common.BaseResponse;
+import com.maple.maplepicture.infrastructure.common.DeleteRequest;
+import com.maple.maplepicture.infrastructure.common.ResultUtils;
+import com.maple.maplepicture.domain.user.constant.UserConstant;
+import com.maple.maplepicture.infrastructure.exception.BusinessException;
+import com.maple.maplepicture.infrastructure.exception.ErrorCode;
+import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
 import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maple.maplepicturebackend.model.dto.space.*;
 import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.enums.SpaceLevelEnum;
 import com.maple.maplepicturebackend.model.vo.SpaceVO;
 import com.maple.maplepicturebackend.service.SpaceService;
-import com.maple.maplepicturebackend.service.UserService;
+import com.maple.maplepicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class SpaceController {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
     @Resource
     private SpaceService spaceService;
     @Resource
@@ -50,7 +50,7 @@ public class SpaceController {
     @PostMapping("/add")
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request){
         ThrowUtils.throwIf(spaceAddRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         long newId = spaceService.addSpace(spaceAddRequest, loginUser);
         return ResultUtils.success(newId);
     }
@@ -64,7 +64,7 @@ public class SpaceController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         Space oldSpace = spaceService.getById(id);
@@ -127,7 +127,7 @@ public class SpaceController {
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
         SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         spaceVO.setPermissionList(permissionList);
         // 获取封装类
@@ -183,7 +183,7 @@ public class SpaceController {
         // 设置编辑时间
         space.setEditTime(new Date());
         // 补充审核参数
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 数据校验
         spaceService.validSpace(space, false);
         // 判断是否存在

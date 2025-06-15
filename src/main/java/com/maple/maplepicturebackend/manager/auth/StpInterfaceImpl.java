@@ -10,20 +10,20 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.json.JSONUtil;
-import com.maple.maplepicturebackend.constant.UserConstant;
-import com.maple.maplepicturebackend.exception.BusinessException;
-import com.maple.maplepicturebackend.exception.ErrorCode;
+import com.maple.maplepicture.domain.user.constant.UserConstant;
+import com.maple.maplepicture.infrastructure.exception.BusinessException;
+import com.maple.maplepicture.infrastructure.exception.ErrorCode;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserPermissionConstant;
 import com.maple.maplepicturebackend.model.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.Space;
 import com.maple.maplepicturebackend.model.entity.SpaceUser;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.enums.SpaceRoleEnum;
 import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
 import com.maple.maplepicturebackend.service.PictureService;
 import com.maple.maplepicturebackend.service.SpaceService;
 import com.maple.maplepicturebackend.service.SpaceUserService;
-import com.maple.maplepicturebackend.service.UserService;
+import com.maple.maplepicture.application.service.UserApplicationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -47,7 +47,7 @@ public class StpInterfaceImpl implements StpInterface {
     private SpaceService spaceService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private PictureService pictureService;
@@ -122,7 +122,7 @@ public class StpInterfaceImpl implements StpInterface {
             spaceId = picture.getSpaceId();
             // 公共图库，仅本人或管理员可操作
             if (spaceId == null) {
-                if (picture.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
+                if (picture.getUserId().equals(userId) || loginUser.isAdmin()) {
                     return ADMIN_PERMISSIONS;
                 } else {
                     // 不是自己的图片，仅可查看
@@ -138,7 +138,7 @@ public class StpInterfaceImpl implements StpInterface {
         // 根据 Space 类型判断权限
         if (space.getSpaceType() == SpaceTypeEnum.PRIVATE.getValue()) {
             // 私有空间，仅本人或管理员有权限
-            if (space.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
+            if (space.getUserId().equals(userId) || loginUser.isAdmin()) {
                 return ADMIN_PERMISSIONS;
             } else {
                 return new ArrayList<>();

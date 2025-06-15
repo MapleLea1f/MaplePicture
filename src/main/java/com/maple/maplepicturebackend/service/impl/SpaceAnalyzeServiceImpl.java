@@ -5,19 +5,19 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.maple.maplepicturebackend.exception.BusinessException;
-import com.maple.maplepicturebackend.exception.ErrorCode;
-import com.maple.maplepicturebackend.exception.ThrowUtils;
-import com.maple.maplepicturebackend.mapper.SpaceMapper;
+import com.maple.maplepicture.infrastructure.exception.BusinessException;
+import com.maple.maplepicture.infrastructure.exception.ErrorCode;
+import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
+import com.maple.maplepicture.infrastructure.mapper.SpaceMapper;
 import com.maple.maplepicturebackend.model.dto.space.analyze.*;
 import com.maple.maplepicturebackend.model.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.vo.space.analyze.*;
 import com.maple.maplepicturebackend.service.PictureService;
 import com.maple.maplepicturebackend.service.SpaceAnalyzeService;
 import com.maple.maplepicturebackend.service.SpaceService;
-import com.maple.maplepicturebackend.service.UserService;
+import com.maple.maplepicture.application.service.UserApplicationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -36,7 +36,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     implements SpaceAnalyzeService{
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -164,7 +164,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         boolean queryAll = spaceAnalyzeRequest.isQueryAll();
         // 全空间分析或者公共图库权限校验：仅管理员可访问
         if (queryAll || queryPublic){
-            ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR);
+            ThrowUtils.throwIf(!loginUser.isAdmin(), ErrorCode.NO_AUTH_ERROR);
         } else {
             // 分析特定空间，仅本人或管理员可访问
             Long spaceId = spaceAnalyzeRequest.getSpaceId();
@@ -278,7 +278,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
 
         // 仅管理员可查看空间排行
-        ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无权查看空间排行");
+        ThrowUtils.throwIf(!loginUser.isAdmin(), ErrorCode.NO_AUTH_ERROR, "无权查看空间排行");
 
         // 构造查询条件
         QueryWrapper<Space> queryWrapper = new QueryWrapper<>();

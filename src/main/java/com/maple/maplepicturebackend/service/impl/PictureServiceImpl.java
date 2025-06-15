@@ -8,29 +8,29 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.maple.maplepicturebackend.api.aliyunai.AliYunAiApi;
-import com.maple.maplepicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
-import com.maple.maplepicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.maple.maplepicturebackend.exception.BusinessException;
-import com.maple.maplepicturebackend.exception.ErrorCode;
-import com.maple.maplepicturebackend.exception.ThrowUtils;
-import com.maple.maplepicturebackend.manager.CosManager;
+import com.maple.maplepicture.infrastructure.api.aliyunai.AliYunAiApi;
+import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.maple.maplepicture.infrastructure.exception.BusinessException;
+import com.maple.maplepicture.infrastructure.exception.ErrorCode;
+import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
+import com.maple.maplepicture.infrastructure.api.CosManager;
 import com.maple.maplepicturebackend.manager.upload.FilePictureUpload;
 import com.maple.maplepicturebackend.manager.upload.PictureUploadTemplate;
 import com.maple.maplepicturebackend.manager.upload.UrlPictureUpload;
-import com.maple.maplepicturebackend.mapper.PictureMapper;
+import com.maple.maplepicture.infrastructure.mapper.PictureMapper;
 import com.maple.maplepicturebackend.model.dto.file.UploadPictureResult;
 import com.maple.maplepicturebackend.model.dto.picture.*;
 import com.maple.maplepicturebackend.model.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.enums.PictureReviewStatusEnum;
 import com.maple.maplepicturebackend.model.vo.PictureVO;
-import com.maple.maplepicturebackend.model.vo.UserVO;
+import com.maple.maplepicture.interfaces.vo.user.UserVO;
 import com.maple.maplepicturebackend.service.PictureService;
 import com.maple.maplepicturebackend.service.SpaceService;
-import com.maple.maplepicturebackend.service.UserService;
-import com.maple.maplepicturebackend.utils.ColorSimilarUtils;
+import com.maple.maplepicture.application.service.UserApplicationService;
+import com.maple.maplepicture.infrastructure.utils.ColorSimilarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -66,7 +66,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     private UrlPictureUpload urlPictureUpload;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
     @Resource
     private CosManager cosManager;
     @Resource
@@ -113,7 +113,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
             // 仅本人或管理员可编辑图片
-            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            if (!oldPicture.getUserId().equals(loginUser.getId()) && !loginUser.isAdmin()) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
             // 检验空间是否一致
@@ -269,8 +269,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 关联查询用户信息
         Long userId = picture.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getUserById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             pictureVO.setUser(userVO);
         }
         return pictureVO;
@@ -290,7 +290,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         List<PictureVO> pictureVOList = pictureList.stream().map(PictureVO::objToVo).collect(Collectors.toList());
         // 1. 关联查询用户信息
         Set<Long> userIdSet = pictureList.stream().map(Picture::getUserId).collect(Collectors.toSet());
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 2. 填充信息
         pictureVOList.forEach(pictureVO -> {
@@ -299,7 +299,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            pictureVO.setUser(userService.getUserVO(user));
+            pictureVO.setUser(userApplicationService.getUserVO(user));
         });
         pictureVOPage.setRecords(pictureVOList);
         return pictureVOPage;
@@ -362,7 +362,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
      */
     @Override
     public void fillReviewParams(Picture picture, User loginUser) {
-        if (userService.isAdmin(loginUser)) {
+        if (loginUser.isAdmin()) {
             // 管理员自动过审
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             picture.setReviewerId(loginUser.getId());
@@ -457,7 +457,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Long loginUserId = loginUser.getId();
         if (spaceId == null) {
             // 公共图库，仅本人或管理员可操作
-            if (!picture.getUserId().equals(loginUserId) && !userService.isAdmin(loginUser)) {
+            if (!picture.getUserId().equals(loginUserId) && !loginUser.isAdmin()) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
         } else {

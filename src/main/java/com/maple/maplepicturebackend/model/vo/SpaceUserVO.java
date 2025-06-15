@@ -1,5 +1,6 @@
 package com.maple.maplepicturebackend.model.vo;
 
+import com.maple.maplepicture.interfaces.vo.user.UserVO;
 import com.maple.maplepicturebackend.model.entity.SpaceUser;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

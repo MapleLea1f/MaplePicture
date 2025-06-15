@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.maple.maplepicturebackend.model.dto.space.SpaceAddRequest;
 import com.maple.maplepicturebackend.model.dto.space.SpaceQueryRequest;
 import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.vo.SpaceVO;
 
 import javax.servlet.http.HttpServletRequest;

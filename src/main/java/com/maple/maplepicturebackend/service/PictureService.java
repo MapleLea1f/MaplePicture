@@ -3,10 +3,10 @@ package com.maple.maplepicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.maple.maplepicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.maple.maplepicturebackend.model.dto.picture.*;
 import com.maple.maplepicturebackend.model.entity.Picture;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.vo.PictureVO;
 
 import javax.servlet.http.HttpServletRequest;

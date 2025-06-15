@@ -7,11 +7,11 @@ import com.maple.maplepicturebackend.manager.auth.model.SpaceUserAuthConfig;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserRole;
 import com.maple.maplepicturebackend.model.entity.Space;
 import com.maple.maplepicturebackend.model.entity.SpaceUser;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.enums.SpaceRoleEnum;
 import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
 import com.maple.maplepicturebackend.service.SpaceUserService;
-import com.maple.maplepicturebackend.service.UserService;
+import com.maple.maplepicture.application.service.UserApplicationService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -25,7 +25,7 @@ public class SpaceUserAuthManager {
     private SpaceUserService spaceUserService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     public static final SpaceUserAuthConfig SPACE_USER_AUTH_CONFIG;
 
@@ -61,7 +61,7 @@ public class SpaceUserAuthManager {
         List<String> ADMIN_PERMISSIONS = getPermissionsByRole(SpaceRoleEnum.ADMIN.getValue());
         // 公共图库
         if (space == null) {
-            if (userService.isAdmin(loginUser)) {
+            if (loginUser.isAdmin()) {
                 return ADMIN_PERMISSIONS;
             }
             return new ArrayList<>();
@@ -74,7 +74,7 @@ public class SpaceUserAuthManager {
         switch (spaceTypeEnum) {
             case PRIVATE:
                 // 私有空间，仅本人或管理员有所有权限
-                if (space.getUserId().equals(loginUser.getId()) || userService.isAdmin(loginUser)) {
+                if (space.getUserId().equals(loginUser.getId()) || loginUser.isAdmin()) {
                     return ADMIN_PERMISSIONS;
                 } else {
                     return new ArrayList<>();

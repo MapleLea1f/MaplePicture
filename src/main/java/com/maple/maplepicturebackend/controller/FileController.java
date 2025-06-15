@@ -1,12 +1,12 @@
 package com.maple.maplepicturebackend.controller;
 
-import com.maple.maplepicturebackend.annotation.AuthCheck;
-import com.maple.maplepicturebackend.common.BaseResponse;
-import com.maple.maplepicturebackend.common.ResultUtils;
-import com.maple.maplepicturebackend.constant.UserConstant;
-import com.maple.maplepicturebackend.exception.BusinessException;
-import com.maple.maplepicturebackend.exception.ErrorCode;
-import com.maple.maplepicturebackend.manager.CosManager;
+import com.maple.maplepicture.infrastructure.annotation.AuthCheck;
+import com.maple.maplepicture.infrastructure.common.BaseResponse;
+import com.maple.maplepicture.infrastructure.common.ResultUtils;
+import com.maple.maplepicture.domain.user.constant.UserConstant;
+import com.maple.maplepicture.infrastructure.exception.BusinessException;
+import com.maple.maplepicture.infrastructure.exception.ErrorCode;
+import com.maple.maplepicture.infrastructure.api.CosManager;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.COSObjectInputStream;
 import com.qcloud.cos.utils.IOUtils;

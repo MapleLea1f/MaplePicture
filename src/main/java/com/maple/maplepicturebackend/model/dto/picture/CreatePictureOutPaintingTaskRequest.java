@@ -1,6 +1,6 @@
 package com.maple.maplepicturebackend.model.dto.picture;
 
-import com.maple.maplepicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import lombok.Data;
 
 import java.io.Serializable;

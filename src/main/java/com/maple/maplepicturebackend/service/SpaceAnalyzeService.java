@@ -3,7 +3,7 @@ package com.maple.maplepicturebackend.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.maple.maplepicturebackend.model.dto.space.analyze.*;
 import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.User;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.vo.space.analyze.*;
 
 import java.util.List;

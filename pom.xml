@@ -196,7 +196,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.maple.maplepicturebackend.MaplePictureBackendApplication</mainClass>
+                    <mainClass>com.maple.maplepicture.MaplePictureBackendApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>

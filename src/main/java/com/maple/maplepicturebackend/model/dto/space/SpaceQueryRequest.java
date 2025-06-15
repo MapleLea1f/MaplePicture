@@ -2,7 +2,7 @@ package com.maple.maplepicturebackend.model.dto.space;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.maple.maplepicturebackend.common.PageRequest;
+import com.maple.maplepicture.infrastructure.common.PageRequest;
 import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)

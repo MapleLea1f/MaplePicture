@@ -1,6 +1,6 @@
 package com.maple.maplepicturebackend.manager.websocket.model;
 
-import com.maple.maplepicturebackend.model.vo.UserVO;
+import com.maple.maplepicture.interfaces.vo.user.UserVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

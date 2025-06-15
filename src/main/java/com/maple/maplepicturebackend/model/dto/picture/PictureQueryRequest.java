@@ -1,6 +1,6 @@
 package com.maple.maplepicturebackend.model.dto.picture;
 
-import com.maple.maplepicturebackend.common.PageRequest;
+import com.maple.maplepicture.infrastructure.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
