@@ -3,15 +3,15 @@ package com.maple.maplepicturebackend.manager.auth;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.maple.maplepicture.application.service.SpaceUserApplicationService;
+import com.maple.maplepicture.application.service.UserApplicationService;
+import com.maple.maplepicture.domain.space.entity.Space;
+import com.maple.maplepicture.domain.space.entity.SpaceUser;
+import com.maple.maplepicture.domain.space.valueobject.SpaceRoleEnum;
+import com.maple.maplepicture.domain.space.valueobject.SpaceTypeEnum;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserAuthConfig;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserRole;
-import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.SpaceUser;
-import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicturebackend.model.enums.SpaceRoleEnum;
-import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
-import com.maple.maplepicturebackend.service.SpaceUserService;
-import com.maple.maplepicture.application.service.UserApplicationService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -22,7 +22,7 @@ import java.util.List;
 public class SpaceUserAuthManager {
 
     @Resource
-    private SpaceUserService spaceUserService;
+    private SpaceUserApplicationService spaceUserApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -81,7 +81,7 @@ public class SpaceUserAuthManager {
                 }
             case TEAM:
                 // 团队空间，查询 SpaceUser 并获取角色和权限
-                SpaceUser spaceUser = spaceUserService.lambdaQuery()
+                SpaceUser spaceUser = spaceUserApplicationService.lambdaQuery()
                         .eq(SpaceUser::getSpaceId, space.getId())
                         .eq(SpaceUser::getUserId, loginUser.getId())
                         .one();

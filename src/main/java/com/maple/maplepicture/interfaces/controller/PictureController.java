@@ -7,11 +7,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.maple.maplepicture.application.service.PictureApplicationService;
+import com.maple.maplepicture.application.service.SpaceApplicationService;
 import com.maple.maplepicture.application.service.UserApplicationService;
 import com.maple.maplepicture.domain.picture.entity.Picture;
+import com.maple.maplepicture.domain.picture.valueobject.PictureReviewStatusEnum;
+import com.maple.maplepicture.domain.space.entity.Space;
 import com.maple.maplepicture.domain.user.constant.UserConstant;
 import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicture.domain.user.valueobject.PictureReviewStatusEnum;
 import com.maple.maplepicture.infrastructure.annotation.AuthCheck;
 import com.maple.maplepicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
@@ -32,8 +34,6 @@ import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maple.maplepicturebackend.manager.auth.StpKit;
 import com.maple.maplepicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -59,7 +59,7 @@ public class PictureController {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
     @Resource
     private AliYunAiApi aliYunAiApi;
     @Resource
@@ -195,7 +195,7 @@ public class PictureController {
             // 已改为注解鉴权
             // User loginUser = userService.getLoginUser(request);
             // pictureService.checkPictureAuth(loginUser, picture);
-            space = spaceService.getById(spaceId);
+            space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         }
         User loginUser = userApplicationService.getLoginUser(request);

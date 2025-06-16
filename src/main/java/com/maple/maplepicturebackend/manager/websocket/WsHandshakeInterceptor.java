@@ -2,15 +2,15 @@ package com.maple.maplepicturebackend.manager.websocket;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.maple.maplepicture.application.service.PictureApplicationService;
+import com.maple.maplepicture.application.service.SpaceApplicationService;
+import com.maple.maplepicture.application.service.UserApplicationService;
+import com.maple.maplepicture.domain.picture.entity.Picture;
+import com.maple.maplepicture.domain.space.entity.Space;
+import com.maple.maplepicture.domain.space.valueobject.SpaceTypeEnum;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.maple.maplepicture.domain.picture.entity.Picture;
-import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
-import com.maple.maplepicture.application.service.PictureApplicationService;
-import com.maple.maplepicturebackend.service.SpaceService;
-import com.maple.maplepicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -36,7 +36,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     private PictureApplicationService pictureApplicationService;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
@@ -65,7 +65,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
             Long spaceId = picture.getSpaceId();
             Space space = null;
             if (spaceId != null){
-                space = spaceService.getById(spaceId);
+                space = spaceApplicationService.getById(spaceId);
                 if (space == null){
                     log.error("空间不存在，拒绝握手");
                     return false;

@@ -6,11 +6,13 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.maple.maplepicture.application.service.SpaceApplicationService;
 import com.maple.maplepicture.domain.picture.entity.Picture;
 import com.maple.maplepicture.domain.picture.repository.PictureRepository;
 import com.maple.maplepicture.domain.picture.service.PictureDomainService;
+import com.maple.maplepicture.domain.picture.valueobject.PictureReviewStatusEnum;
+import com.maple.maplepicture.domain.space.entity.Space;
 import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicture.domain.user.valueobject.PictureReviewStatusEnum;
 import com.maple.maplepicture.infrastructure.api.CosManager;
 import com.maple.maplepicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
@@ -25,8 +27,6 @@ import com.maple.maplepicturebackend.manager.upload.FilePictureUpload;
 import com.maple.maplepicturebackend.manager.upload.PictureUploadTemplate;
 import com.maple.maplepicturebackend.manager.upload.UrlPictureUpload;
 import com.maple.maplepicturebackend.model.dto.file.UploadPictureResult;
-import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -62,7 +62,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
     @Resource
     private CosManager cosManager;
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
     @Resource
     private TransactionTemplate transactionTemplate;
     @Resource
@@ -77,7 +77,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         // 空间权限校验
         Long spaceId = pictureUploadRequest.getSpaceId();
         if (spaceId != null) {
-            Space space = spaceService.getById(spaceId);
+            Space space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
             // 必须空间创建人（管理员）才能上传
             if (!loginUser.getId().equals(space.getUserId())) {
@@ -165,7 +165,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             boolean result = pictureRepository.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "图片上传失败");
             if (finalSpaceId != null) {
-                boolean update = spaceService.lambdaUpdate()
+                boolean update = spaceApplicationService.lambdaUpdate()
                         .eq(Space::getId, finalSpaceId)
                         .setSql("totalSize = totalSize + " + picture.getPicSize())
                         .setSql("totalCount = totalCount + 1")
@@ -418,7 +418,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             // 释放额度
             Long spaceId = oldPicture.getSpaceId();
             if (spaceId != null) {
-                boolean update = spaceService.lambdaUpdate()
+                boolean update = spaceApplicationService.lambdaUpdate()
                         .eq(Space::getId, spaceId)
                         .setSql("totalSize = totalSize - " + oldPicture.getPicSize())
                         .setSql("totalCount = totalCount - 1")
@@ -457,7 +457,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         ThrowUtils.throwIf(spaceId == null || StrUtil.isBlank(picColor), ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 2. 校验空间权限
-        Space space = spaceService.getById(spaceId);
+        Space space = spaceApplicationService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
         if (!space.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
@@ -507,7 +507,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
 
         // 2. 校验空间参数
-        Space space = spaceService.getById(spaceId);
+        Space space = spaceApplicationService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
         if (!space.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");

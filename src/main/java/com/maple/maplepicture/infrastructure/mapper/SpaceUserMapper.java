@@ -1,6 +1,6 @@
 package com.maple.maplepicture.infrastructure.mapper;
 
-import com.maple.maplepicturebackend.model.entity.SpaceUser;
+import com.maple.maplepicture.domain.space.entity.SpaceUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

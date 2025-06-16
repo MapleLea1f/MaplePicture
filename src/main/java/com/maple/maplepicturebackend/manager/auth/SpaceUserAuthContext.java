@@ -1,8 +1,8 @@
 package com.maple.maplepicturebackend.manager.auth;
 
 import com.maple.maplepicture.domain.picture.entity.Picture;
-import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.SpaceUser;
+import com.maple.maplepicture.domain.space.entity.Space;
+import com.maple.maplepicture.domain.space.entity.SpaceUser;
 import lombok.Data;
 
 /**

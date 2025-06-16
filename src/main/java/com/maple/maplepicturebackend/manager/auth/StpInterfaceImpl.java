@@ -10,20 +10,20 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.json.JSONUtil;
+import com.maple.maplepicture.application.service.PictureApplicationService;
+import com.maple.maplepicture.application.service.SpaceApplicationService;
+import com.maple.maplepicture.application.service.SpaceUserApplicationService;
+import com.maple.maplepicture.application.service.UserApplicationService;
+import com.maple.maplepicture.domain.picture.entity.Picture;
+import com.maple.maplepicture.domain.space.entity.Space;
+import com.maple.maplepicture.domain.space.entity.SpaceUser;
+import com.maple.maplepicture.domain.space.valueobject.SpaceRoleEnum;
+import com.maple.maplepicture.domain.space.valueobject.SpaceTypeEnum;
 import com.maple.maplepicture.domain.user.constant.UserConstant;
+import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicture.infrastructure.exception.BusinessException;
 import com.maple.maplepicture.infrastructure.exception.ErrorCode;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.maple.maplepicture.domain.picture.entity.Picture;
-import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicturebackend.model.entity.SpaceUser;
-import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicturebackend.model.enums.SpaceRoleEnum;
-import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
-import com.maple.maplepicture.application.service.PictureApplicationService;
-import com.maple.maplepicturebackend.service.SpaceService;
-import com.maple.maplepicturebackend.service.SpaceUserService;
-import com.maple.maplepicture.application.service.UserApplicationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -44,7 +44,7 @@ public class StpInterfaceImpl implements StpInterface {
     private String contextPath;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -53,7 +53,7 @@ public class StpInterfaceImpl implements StpInterface {
     private PictureApplicationService pictureApplicationService;
 
     @Resource
-    private SpaceUserService spaceUserService;
+    private SpaceUserApplicationService spaceUserApplicationService;
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
@@ -88,12 +88,12 @@ public class StpInterfaceImpl implements StpInterface {
         // 如果有 spaceUserId，必然是团队空间，通过数据库查询 SpaceUser 对象
         Long spaceUserId = authContext.getSpaceUserId();
         if (spaceUserId != null) {
-            spaceUser = spaceUserService.getById(spaceUserId);
+            spaceUser = spaceUserApplicationService.getById(spaceUserId);
             if (spaceUser == null) {
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "未找到空间用户信息");
             }
             // 取出当前登录用户对应的 spaceUser
-            SpaceUser loginSpaceUser = spaceUserService.lambdaQuery()
+            SpaceUser loginSpaceUser = spaceUserApplicationService.lambdaQuery()
                     .eq(SpaceUser::getSpaceId, spaceUser.getSpaceId())
                     .eq(SpaceUser::getUserId, userId)
                     .one();
@@ -131,7 +131,7 @@ public class StpInterfaceImpl implements StpInterface {
             }
         }
         // 获取 Space 对象
-        Space space = spaceService.getById(spaceId);
+        Space space = spaceApplicationService.getById(spaceId);
         if (space == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "未找到空间信息");
         }
@@ -145,7 +145,7 @@ public class StpInterfaceImpl implements StpInterface {
             }
         } else {
             // 团队空间，查询 SpaceUser 并获取角色和权限
-            spaceUser = spaceUserService.lambdaQuery()
+            spaceUser = spaceUserApplicationService.lambdaQuery()
                     .eq(SpaceUser::getSpaceId, spaceId)
                     .eq(SpaceUser::getUserId, userId)
                     .one();
