@@ -10,11 +10,11 @@ import com.maple.maplepicture.infrastructure.exception.ErrorCode;
 import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
 import com.maple.maplepicture.infrastructure.mapper.SpaceMapper;
 import com.maple.maplepicturebackend.model.dto.space.analyze.*;
-import com.maple.maplepicturebackend.model.entity.Picture;
+import com.maple.maplepicture.domain.picture.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.Space;
 import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.vo.space.analyze.*;
-import com.maple.maplepicturebackend.service.PictureService;
+import com.maple.maplepicture.application.service.PictureApplicationService;
 import com.maple.maplepicturebackend.service.SpaceAnalyzeService;
 import com.maple.maplepicturebackend.service.SpaceService;
 import com.maple.maplepicture.application.service.UserApplicationService;
@@ -42,7 +42,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     private SpaceService spaceService;
 
     @Resource
-    private PictureService pictureService;
+    private PictureApplicationService pictureApplicationService;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -60,7 +60,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             queryWrapper.select("picSize");
             // 自动补充查询范围
             fillAnalyzeQueryWrapper(spaceUsageAnalyzeRequest, queryWrapper);
-            List<Object> pictureObjList = pictureService.getBaseMapper().selectObjs(queryWrapper);
+            List<Object> pictureObjList = pictureApplicationService.getBaseMapper().selectObjs(queryWrapper);
             long usedSize = pictureObjList.stream().mapToLong(obj -> (Long) obj).sum();
             long usedCount = pictureObjList.size();
             // 封装返回结果
@@ -110,7 +110,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 .groupBy("category");
 
         // 查询并转换结果
-        return pictureService.getBaseMapper().selectMaps(queryWrapper)
+        return pictureApplicationService.getBaseMapper().selectMaps(queryWrapper)
                 .stream()
                 .map(result -> {
                     String category = (String) result.get("category");
@@ -134,7 +134,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
 
         // 查询所有符合条件的标签
         queryWrapper.select("tags");
-        List<String> tagsJsonList = pictureService.getBaseMapper().selectObjs(queryWrapper)
+        List<String> tagsJsonList = pictureApplicationService.getBaseMapper().selectObjs(queryWrapper)
                 .stream()
                 .filter(ObjUtil::isNotNull)
                 .map(Object::toString)
@@ -213,7 +213,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 查询所有符合条件的图片大小
         queryWrapper.select("picSize");
         // 100、120、1000
-        List<Long> picSizes = pictureService.getBaseMapper().selectObjs(queryWrapper)
+        List<Long> picSizes = pictureApplicationService.getBaseMapper().selectObjs(queryWrapper)
                 .stream()
                 .map(size -> ((Number) size).longValue())
                 .collect(Collectors.toList());
@@ -263,7 +263,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         queryWrapper.groupBy("period").orderByAsc("period");
 
         // 查询结果并转换
-        List<Map<String, Object>> queryResult = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        List<Map<String, Object>> queryResult = pictureApplicationService.getBaseMapper().selectMaps(queryWrapper);
         return queryResult.stream()
                 .map(result -> {
                     String period = result.get("period").toString();

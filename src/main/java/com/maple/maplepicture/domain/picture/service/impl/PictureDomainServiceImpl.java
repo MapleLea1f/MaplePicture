@@ -1,4 +1,4 @@
-package com.maple.maplepicturebackend.service.impl;
+package com.maple.maplepicture.domain.picture.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -6,43 +6,37 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.maple.maplepicture.domain.picture.entity.Picture;
+import com.maple.maplepicture.domain.picture.repository.PictureRepository;
+import com.maple.maplepicture.domain.picture.service.PictureDomainService;
+import com.maple.maplepicture.domain.user.entity.User;
+import com.maple.maplepicture.domain.user.valueobject.PictureReviewStatusEnum;
+import com.maple.maplepicture.infrastructure.api.CosManager;
 import com.maple.maplepicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.maple.maplepicture.infrastructure.exception.BusinessException;
 import com.maple.maplepicture.infrastructure.exception.ErrorCode;
 import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
-import com.maple.maplepicture.infrastructure.api.CosManager;
+import com.maple.maplepicture.infrastructure.utils.ColorSimilarUtils;
+import com.maple.maplepicture.interfaces.dto.picture.*;
+import com.maple.maplepicture.interfaces.vo.picture.PictureVO;
 import com.maple.maplepicturebackend.manager.upload.FilePictureUpload;
 import com.maple.maplepicturebackend.manager.upload.PictureUploadTemplate;
 import com.maple.maplepicturebackend.manager.upload.UrlPictureUpload;
-import com.maple.maplepicture.infrastructure.mapper.PictureMapper;
 import com.maple.maplepicturebackend.model.dto.file.UploadPictureResult;
-import com.maple.maplepicturebackend.model.dto.picture.*;
-import com.maple.maplepicturebackend.model.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.Space;
-import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicturebackend.model.enums.PictureReviewStatusEnum;
-import com.maple.maplepicturebackend.model.vo.PictureVO;
-import com.maple.maplepicture.interfaces.vo.user.UserVO;
-import com.maple.maplepicturebackend.service.PictureService;
 import com.maple.maplepicturebackend.service.SpaceService;
-import com.maple.maplepicture.application.service.UserApplicationService;
-import com.maple.maplepicture.infrastructure.utils.ColorSimilarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
@@ -56,17 +50,15 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
-        implements PictureService {
+public class PictureDomainServiceImpl implements PictureDomainService {
 
+
+    @Resource
+    private PictureRepository pictureRepository;
     @Resource
     private FilePictureUpload filePictureUpload;
-
     @Resource
     private UrlPictureUpload urlPictureUpload;
-
-    @Resource
-    private UserApplicationService userApplicationService;
     @Resource
     private CosManager cosManager;
     @Resource
@@ -110,7 +102,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture oldPicture = null;
         // 如果是更新，判断图片是否存在
         if (pictureId != null) {
-            oldPicture = this.getById(pictureId);
+            oldPicture = pictureRepository.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
             // 仅本人或管理员可编辑图片
             if (!oldPicture.getUserId().equals(loginUser.getId()) && !loginUser.isAdmin()) {
@@ -170,7 +162,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 开启事务
         Long finalSpaceId = spaceId;
         transactionTemplate.execute(status -> {
-            boolean result = this.saveOrUpdate(picture);
+            boolean result = pictureRepository.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "图片上传失败");
             if (finalSpaceId != null) {
                 boolean update = spaceService.lambdaUpdate()
@@ -262,66 +254,6 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         return queryWrapper;
     }
 
-    @Override
-    public PictureVO getPictureVO(Picture picture, HttpServletRequest request) {
-        // 对象转封装类
-        PictureVO pictureVO = PictureVO.objToVo(picture);
-        // 关联查询用户信息
-        Long userId = picture.getUserId();
-        if (userId != null && userId > 0) {
-            User user = userApplicationService.getUserById(userId);
-            UserVO userVO = userApplicationService.getUserVO(user);
-            pictureVO.setUser(userVO);
-        }
-        return pictureVO;
-    }
-
-    /**
-     * 分页获取图片封装
-     */
-    @Override
-    public Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request) {
-        List<Picture> pictureList = picturePage.getRecords();
-        Page<PictureVO> pictureVOPage = new Page<>(picturePage.getCurrent(), picturePage.getSize(), picturePage.getTotal());
-        if (CollUtil.isEmpty(pictureList)) {
-            return pictureVOPage;
-        }
-        // 对象列表 => 封装对象列表
-        List<PictureVO> pictureVOList = pictureList.stream().map(PictureVO::objToVo).collect(Collectors.toList());
-        // 1. 关联查询用户信息
-        Set<Long> userIdSet = pictureList.stream().map(Picture::getUserId).collect(Collectors.toSet());
-        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
-                .collect(Collectors.groupingBy(User::getId));
-        // 2. 填充信息
-        pictureVOList.forEach(pictureVO -> {
-            Long userId = pictureVO.getUserId();
-            User user = null;
-            if (userIdUserListMap.containsKey(userId)) {
-                user = userIdUserListMap.get(userId).get(0);
-            }
-            pictureVO.setUser(userApplicationService.getUserVO(user));
-        });
-        pictureVOPage.setRecords(pictureVOList);
-        return pictureVOPage;
-    }
-
-    @Override
-    public void validPicture(Picture picture) {
-        ThrowUtils.throwIf(picture == null, ErrorCode.PARAMS_ERROR);
-        // 从对象中取值
-        Long id = picture.getId();
-        String url = picture.getUrl();
-        String introduction = picture.getIntroduction();
-        // 修改数据时，id 不能为空，有参数则校验
-        ThrowUtils.throwIf(ObjUtil.isNull(id), ErrorCode.PARAMS_ERROR, "id 不能为空");
-        if (StrUtil.isNotBlank(url)) {
-            ThrowUtils.throwIf(url.length() > 1024, ErrorCode.PARAMS_ERROR, "url 过长");
-        }
-        if (StrUtil.isNotBlank(introduction)) {
-            ThrowUtils.throwIf(introduction.length() > 800, ErrorCode.PARAMS_ERROR, "简介过长");
-        }
-    }
-
 
     @Override
     public void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser) {
@@ -337,7 +269,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
 
         // 2. 判断图片是否存在
-        Picture oldPicture = this.getById(id);
+        Picture oldPicture = pictureRepository.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
 
         // 3. 判断是否已经审核过(状态相同)
@@ -350,7 +282,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         BeanUtil.copyProperties(pictureReviewRequest, updatePicture);
         updatePicture.setReviewTime(new Date());
         updatePicture.setReviewerId(loginUser.getId());
-        boolean result = this.updateById(updatePicture);
+        boolean result = pictureRepository.updateById(updatePicture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "审核失败");
     }
 
@@ -435,7 +367,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     public void clearPictureFile(Picture oldPicture) {
         // 判断该图片是否被多条记录使用
         String pictureUrl = oldPicture.getUrl();
-        Long count = this.lambdaQuery()
+        Long count = pictureRepository.lambdaQuery()
                 .eq(Picture::getUrl, pictureUrl)
                 .count();
         // 有不止一条记录用到了该图片，不清理
@@ -473,7 +405,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         ThrowUtils.throwIf(pictureId <= 0, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 判断是否存在
-        Picture oldPicture = this.getById(pictureId);
+        Picture oldPicture = pictureRepository.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 已改为注解鉴权
         // 校验权限
@@ -481,7 +413,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 开启事务
         transactionTemplate.execute(status -> {
             // 操作数据库
-            boolean result = this.removeById(pictureId);
+            boolean result = pictureRepository.removeById(pictureId);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
             // 释放额度
             Long spaceId = oldPicture.getSpaceId();
@@ -500,19 +432,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     }
 
     @Override
-    public void editPicture(PictureEditRequest pictureEditRequest, User loginUser) {
-        // 在此处将实体类和 DTO 进行转换
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureEditRequest, picture);
-        // 注意将 list 转为 string
-        picture.setTags(JSONUtil.toJsonStr(pictureEditRequest.getTags()));
+    public void editPicture(Picture picture, User loginUser) {
         // 设置编辑时间
         picture.setEditTime(new Date());
         // 数据校验
-        this.validPicture(picture);
+        picture.validPicture();
         // 判断是否存在
-        long id = pictureEditRequest.getId();
-        Picture oldPicture = this.getById(id);
+        long id = picture.getId();
+        Picture oldPicture = pictureRepository.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 已改为注解鉴权
         // 校验权限
@@ -520,7 +447,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
-        boolean result = this.updateById(picture);
+        boolean result = pictureRepository.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
     }
 
@@ -536,7 +463,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
         }
         // 3. 查询该空间下的所有图片（必须要有主色调）
-        List<Picture> pictureList = this.lambdaQuery()
+        List<Picture> pictureList = pictureRepository.lambdaQuery()
                 .eq(Picture::getSpaceId, spaceId)
                 .isNotNull(Picture::getPicColor)
                 .list();
@@ -587,7 +514,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
 
         // 3. 查询指定图片（仅选择需要的字段）
-        List<Picture> pictureList = this.lambdaQuery()
+        List<Picture> pictureList = pictureRepository.lambdaQuery()
                 .select(Picture::getId, Picture::getSpaceId)
                 .eq(Picture::getSpaceId, spaceId)
                 .in(Picture::getId, pictureIdList)
@@ -609,7 +536,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         String nameRule = pictureEditByBatchRequest.getNameRule();
         fillPictureWithNameRule(pictureList, nameRule);
         // 5. 操作数据库进行批量更新
-        boolean result = this.updateBatchById(pictureList);
+        boolean result = pictureRepository.updateBatchById(pictureList);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "批量编辑失败");
     }
 
@@ -640,7 +567,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 获取图片信息
         Long pictureId = createPictureOutPaintingTaskRequest.getPictureId();
         // 抛异常方法（new）
-        Picture picture = Optional.ofNullable(this.getById(pictureId))
+        Picture picture = Optional.ofNullable(pictureRepository.getById(pictureId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
         // 已改为注解鉴权
         // 权限校验

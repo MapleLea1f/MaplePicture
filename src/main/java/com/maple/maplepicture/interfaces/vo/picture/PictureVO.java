@@ -1,8 +1,8 @@
-package com.maple.maplepicturebackend.model.vo;
+package com.maple.maplepicture.interfaces.vo.picture;
 
 import cn.hutool.json.JSONUtil;
 import com.maple.maplepicture.interfaces.vo.user.UserVO;
-import com.maple.maplepicturebackend.model.entity.Picture;
+import com.maple.maplepicture.domain.picture.entity.Picture;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 

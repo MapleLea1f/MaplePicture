@@ -1,4 +1,4 @@
-package com.maple.maplepicturebackend.model.enums;
+package com.maple.maplepicture.domain.user.valueobject;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;

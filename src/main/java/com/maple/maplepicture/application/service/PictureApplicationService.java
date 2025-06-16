@@ -1,13 +1,13 @@
-package com.maple.maplepicturebackend.service;
+package com.maple.maplepicture.application.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.maple.maplepicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.maple.maplepicturebackend.model.dto.picture.*;
-import com.maple.maplepicturebackend.model.entity.Picture;
+import com.maple.maplepicture.interfaces.dto.picture.*;
+import com.maple.maplepicture.domain.picture.entity.Picture;
 import com.maple.maplepicture.domain.user.entity.User;
-import com.maple.maplepicturebackend.model.vo.PictureVO;
+import com.maple.maplepicture.interfaces.vo.picture.PictureVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 * @description 针对表【picture(图片)】的数据库操作Service
 * @createDate 2025-03-17 19:36:31
 */
-public interface PictureService extends IService<Picture> {
+public interface PictureApplicationService extends IService<Picture> {
 
     /**
      * 上传图片
@@ -94,10 +94,10 @@ public interface PictureService extends IService<Picture> {
 
     /**
      * 编辑图片
-     * @param pictureEditRequest
+     * @param picture
      * @param loginUser
      */
-    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+    void editPicture(Picture picture, User loginUser);
 
     /**
      * 根据颜色搜索图片

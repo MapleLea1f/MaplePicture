@@ -4,11 +4,11 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maple.maplepicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.maple.maplepicturebackend.model.entity.Picture;
+import com.maple.maplepicture.domain.picture.entity.Picture;
 import com.maple.maplepicturebackend.model.entity.Space;
 import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicturebackend.model.enums.SpaceTypeEnum;
-import com.maple.maplepicturebackend.service.PictureService;
+import com.maple.maplepicture.application.service.PictureApplicationService;
 import com.maple.maplepicturebackend.service.SpaceService;
 import com.maple.maplepicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     private UserApplicationService userApplicationService;
 
     @Resource
-    private PictureService pictureService;
+    private PictureApplicationService pictureApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -57,7 +57,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
                 return false;
             }
             // 校验用户是否有该图片的权限
-            Picture picture = pictureService.getById(pictureId);
+            Picture picture = pictureApplicationService.getById(pictureId);
             if (picture == null){
                 log.error("图片不存在，拒绝握手");
                 return false;

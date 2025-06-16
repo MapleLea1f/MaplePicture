@@ -1,4 +1,4 @@
-package com.maple.maplepicturebackend.model.vo;
+package com.maple.maplepicture.interfaces.vo.picture;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.maple.maplepicturebackend.model.dto.picture;
+package com.maple.maplepicture.interfaces.dto.picture;
 
 import com.maple.maplepicture.infrastructure.common.PageRequest;
 import lombok.Data;
