@@ -19,7 +19,7 @@ import com.maple.maplepicture.interfaces.dto.user.UserQueryRequest;
 import com.maple.maplepicture.interfaces.dto.user.UserRegisterRequest;
 import com.maple.maplepicture.interfaces.vo.user.LoginUserVO;
 import com.maple.maplepicture.interfaces.vo.user.UserVO;
-import com.maple.maplepicturebackend.manager.auth.StpKit;
+import com.maple.maplepicture.shared.auth.StpKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;

@@ -21,7 +21,7 @@ import com.maple.maplepicture.interfaces.dto.spaceuser.SpaceUserQueryRequest;
 import com.maple.maplepicture.interfaces.vo.space.SpaceUserVO;
 import com.maple.maplepicture.interfaces.vo.space.SpaceVO;
 import com.maple.maplepicture.interfaces.vo.user.UserVO;
-import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
+import com.maple.maplepicture.shared.auth.SpaceUserAuthManager;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;

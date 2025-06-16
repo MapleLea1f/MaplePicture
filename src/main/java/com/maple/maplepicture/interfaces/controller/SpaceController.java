@@ -12,7 +12,7 @@ import com.maple.maplepicture.infrastructure.exception.ErrorCode;
 import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
 import com.maple.maplepicture.interfaces.assembler.SpaceAssembler;
 import com.maple.maplepicture.interfaces.dto.space.*;
-import com.maple.maplepicturebackend.manager.auth.SpaceUserAuthManager;
+import com.maple.maplepicture.shared.auth.SpaceUserAuthManager;
 import com.maple.maplepicture.domain.space.entity.Space;
 import com.maple.maplepicture.domain.user.entity.User;
 import com.maple.maplepicture.domain.space.valueobject.SpaceLevelEnum;
