@@ -63,6 +63,20 @@ public class UserController {
     }
 
     /**
+     * 用户修改个人信息
+     * @param request
+     * @return
+     */
+    @PostMapping("/edit")
+    public BaseResponse<Boolean> editUser(@RequestBody UserEditRequest userEditRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(userEditRequest == null, ErrorCode.PARAMS_ERROR);
+        User userEntity = UserAssembler.toUserEntity(userEditRequest);
+        userApplicationService.editUser(userEntity);
+        return ResultUtils.success(true);
+    }
+
+
+    /**
      * 用户登出
      * @param request
      * @return

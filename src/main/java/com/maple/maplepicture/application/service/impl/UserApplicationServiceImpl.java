@@ -194,6 +194,12 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         return userEntity.getId();
     }
 
+    @Override
+    public void editUser(User userEntity) {
+        boolean result = userDomainService.updateById(userEntity);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+    }
+
 }
 
 

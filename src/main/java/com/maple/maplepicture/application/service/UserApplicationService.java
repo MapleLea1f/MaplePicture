@@ -55,4 +55,7 @@ public interface UserApplicationService {
     List<User> listByIds(Set<Long> userIdSet);
 
     long saveUser(User userEntity);
+
+    void editUser(User userEntity);
+
 }

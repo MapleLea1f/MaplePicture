@@ -197,7 +197,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.maple.MaplePictureBackendApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
