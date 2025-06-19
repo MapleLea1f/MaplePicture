@@ -6,18 +6,25 @@
 
 ## 技术栈
 
-- Java 17+
-- Spring Boot
-- MyBatis-Plus
-- Spring Security（权限校验）
-- JWT（分布式认证）
-- Redis（缓存与会话管理）
-- Maven
+## 技术栈
+
+- Java 8+
+- Spring Boot 2.7.x
+- MyBatis-Plus（ORM、分页）
 - MySQL
+- Redis（缓存、分布式会话）
+- Sa-Token（权限认证，含 Redis 集成）
+- ShardingSphere-JDBC（分库分表/分片）
+- Knife4j（Swagger 增强 API 文档）
+- Hutool（工具库）
+- Caffeine（本地缓存）
+- 腾讯云 COS（对象存储）
+- Jsoup（HTML 解析）
+- Lombok（简化代码）
+- Spring AOP & AspectJ（切面编程）
 - WebSocket（实时通信）
-- Lombok
-- MapStruct（对象装配）
-- Swagger（API 文档）
+- Gson（JSON 处理）
+- Maven（项目管理与构建）
 
 ## 主要功能
 
