@@ -6,8 +6,6 @@
 
 ## 技术栈
 
-## 技术栈
-
 - Java 8+
 - Spring Boot 2.7.x
 - MyBatis-Plus（ORM、分页）
