@@ -1,5 +1,4 @@
-# MaplePicture 用户与图片空间管理系统
-
+# MaplePicture 云图库平台
 ## 项目简介
 
 本项目是一个基于 Spring Boot 和 MyBatis-Plus 的后端服务，采用 DDD 架构，提供用户管理、图片管理、空间管理等功能，集成了权限校验、分布式认证、分片、WebSocket 通信等能力，适合作为企业级应用的基础模块。
