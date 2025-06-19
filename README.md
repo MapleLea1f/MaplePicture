@@ -56,9 +56,10 @@
    ```shell
    git clone https://github.com/your-repo/maple-picture-backend-ddd.git
    配置数据库  修改 src/main/resources/application.yml，填写你的数据库连接信息。可参考 sql/create_table.sql 初始化表结构。  
-2. 构建并运行  
-mvn clean install
-mvn spring-boot:run
+2. 构建并运行
+   ```shell
+   mvn clean install
+   mvn spring-boot:run
 已上线地址： maplelea1f.site
 
 
