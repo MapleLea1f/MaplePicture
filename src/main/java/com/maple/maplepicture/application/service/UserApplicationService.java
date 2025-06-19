@@ -58,4 +58,5 @@ public interface UserApplicationService {
 
     void editUser(User userEntity);
 
+    boolean changePassword(Long userId, String oldPassword, String newPassword);
 }

@@ -200,8 +200,24 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
     }
 
+    @Override
+    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
+        // 1. 查询用户
+        User user = userDomainService.getById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+        // 2. 校验旧密码
+        if (!user.getUserPassword().equals(getEncryptPassword(oldPassword))) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "原密码错误");
+        }
+        // 3. 校验新密码
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "新密码长度不能小于6位");
+        }
+        // 4. 修改密码
+        user.setUserPassword(getEncryptPassword(newPassword));
+        return userDomainService.updateById(user);
+    }
+
 }
-
-
-
-

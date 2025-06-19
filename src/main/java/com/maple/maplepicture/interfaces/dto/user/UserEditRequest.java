@@ -1,7 +1,10 @@
 package com.maple.maplepicture.interfaces.dto.user;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class UserEditRequest implements Serializable {
 
     /**

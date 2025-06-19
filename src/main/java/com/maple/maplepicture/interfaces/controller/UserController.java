@@ -12,6 +12,7 @@ import com.maple.maplepicture.infrastructure.exception.BusinessException;
 import com.maple.maplepicture.infrastructure.exception.ErrorCode;
 import com.maple.maplepicture.infrastructure.exception.ThrowUtils;
 import com.maple.maplepicture.interfaces.assembler.UserAssembler;
+import com.maple.maplepicture.interfaces.dto.ChangePasswordRequest;
 import com.maple.maplepicture.interfaces.dto.user.*;
 import com.maple.maplepicture.interfaces.vo.user.LoginUserVO;
 import com.maple.maplepicture.interfaces.vo.user.UserVO;
@@ -64,12 +65,14 @@ public class UserController {
 
     /**
      * 用户修改个人信息
-     * @param request
+     * @param userEditRequest
      * @return
      */
     @PostMapping("/edit")
-    public BaseResponse<Boolean> editUser(@RequestBody UserEditRequest userEditRequest, HttpServletRequest request) {
-        ThrowUtils.throwIf(userEditRequest == null, ErrorCode.PARAMS_ERROR);
+    public BaseResponse<Boolean> editUser(@RequestBody UserEditRequest userEditRequest) {
+        if (userEditRequest == null || userEditRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         User userEntity = UserAssembler.toUserEntity(userEditRequest);
         userApplicationService.editUser(userEntity);
         return ResultUtils.success(true);
@@ -163,5 +166,17 @@ public class UserController {
         return ResultUtils.success(userApplicationService.listUserVOByPage(userQueryRequest));
     }
 
-}
+    /**
+     * 修改密码
+     */
+    @PostMapping("/changePassword")
+    public BaseResponse<Boolean> changePassword(@RequestBody ChangePasswordRequest request, HttpServletRequest httpServletRequest) {
+        User loginUser = userApplicationService.getLoginUser(httpServletRequest);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "未登录");
+        }
+        boolean result = userApplicationService.changePassword(loginUser.getId(), request.getOldPassword(), request.getNewPassword());
+        return ResultUtils.success(result);
+    }
 
+}
