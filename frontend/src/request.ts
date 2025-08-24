@@ -3,7 +3,7 @@ import { message } from 'ant-design-vue'
 
 // 区分开发和生产环境
 const DEV_BASE_URL = "http://localhost:8080";
-const PROD_BASE_URL = "http://MapleLea1f.com";
+const PROD_BASE_URL = "http://MapleLea1f.site";
 // const PROD_BASE_URL = "http://49.234.204.149";
 // 创建 Axios 实例
 const myAxios = axios.create({
@@ -33,7 +33,7 @@ myAxios.interceptors.response.use(
     // 未登录
     if (data.code === 40100) {
       if (
-        !response.request.responseURL.includes("user/get/login") && // 并不是未登录就要强制跳转去登录
+        !response.request.responseURL.includes("user/login") && // 并不是未登录就要强制跳转去登录
         !window.location.pathname.includes("/user/login")
       ){
         message.warning("请先登录")
